@@ -1,0 +1,40 @@
+version: '3'  # Docker version
+
+services:
+    # DB (Postgres)
+    project_postgres:
+        image: 'postgres:12.4'
+        container_name: project_postgres
+        restart: always  # restart if crashed
+        env_file: ../project/.env  # POSTGRES USER, PASSWORD AND DB IN THIS FILE
+        ports:
+            - '5432:5432' # default postgres port
+        volumes:
+            - postgres_docker_volume:/var/lib/postgres/data
+            - ./postgres/postgresql.conf:/etc/postgres/postgresql.conf
+        command: postgres -c config_file=/etc/postgres/postgresql.conf
+        networks:
+            - project_network
+
+    # WEB APP (PYTHON FRAMEWORK INSTALLED WITH requirements.txt)
+    project:
+        build:
+            context: ../
+            dockerfile: ./docker/Dockerfile
+        container_name: project
+        env_file: ../project/.env  # added env variables to the container wnen executed
+        stdin_open: true  # to enable terminal docker-compose exec <container_name> bash
+        volumes:
+            - ../project:/data/web/
+        ports:
+            # exposed container port (server port)
+            - '80:5000'
+        networks:
+            - project_network
+
+networks:
+    project_network:
+        driver: bridge
+
+volumes:
+    postgres_docker_volume: null
