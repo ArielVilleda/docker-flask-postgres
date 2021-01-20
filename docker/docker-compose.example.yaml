@@ -3,7 +3,7 @@ version: '3'  # Docker version
 services:
     # DB (Postgres)
     project_postgres:
-        image_url: 'postgres:12.4'
+        image: 'postgres:12.4'
         container_name: project_postgres
         restart: always  # restart if crashed
         env_file: ../project/.env  # POSTGRES USER, PASSWORD AND DB IN THIS FILE
@@ -22,6 +22,8 @@ services:
             context: ../
             dockerfile: ./docker/Dockerfile
         container_name: project
+        depends_on: 
+            - project_postgres
         env_file: ../project/.env  # added env variables to the container wnen executed
         stdin_open: true  # to enable terminal docker-compose exec <container_name> bash
         volumes:

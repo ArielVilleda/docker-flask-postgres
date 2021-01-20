@@ -1,9 +1,13 @@
 #!/bin/sh
 
-# Applying-Checking migrations
+# Watieng for DB operations 
+# and applying-checking migrations
+sleep 5
 python manage.py db upgrade
 
-# Importing postal_codes to DB
+# Watieng for DB operations 
+# and importing postal_codes to DB
+sleep 5
 python manage.py postal_codes
 
 if [ $FLASK_ENV = "test" -o $FLASK_ENV = "dev" ];

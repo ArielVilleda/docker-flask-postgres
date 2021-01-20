@@ -56,5 +56,27 @@ def postal_codes():
             return 0
 
 
+@manager.command
+def postman_export():
+    """Run PostalCodes sql file to migrate data un postal_codes table
+    THIS WORKS ONLY ON A POSTGRES DB
+    """
+    from flask import json
+    from app import api
+
+    urlvars = False  # Build query strings in URLs
+    swagger = True  # Export Swagger specifications
+    data = api.as_postman(urlvars=urlvars, swagger=swagger)
+    with open('postman_colection.json', 'w') as f:
+        print(json.dumps(data), file=f)
+    return 0
+
+
 if __name__ == '__main__':
+    """NOTE: database commands examples exposed by manage.py:
+    python manage.py db init
+    python manage.py db migrate --message 'Initial database migration'
+    python manage.py db upgrade
+    python manage.py postal_codes
+    """
     manager.run()
