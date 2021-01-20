@@ -58,6 +58,16 @@ class Store(Resource):
         else:
             return store
 
+    @store_api.doc('delete_store')
+    @store_api.response(204, 'store deleted')
+    def delete(self, store_id):
+        """Delete a store given its identifier"""
+        store = StoreModel.query.filter_by(id=store_id).first()
+        if not store:
+            store_api.abort(404, "Store {} not found".format(store_id))
+        store.delete()
+        return '', 204
+
 
 @store_api.route('/<int:store_id>/stock')
 @store_api.param('store_id', 'The Store identifier')
@@ -70,8 +80,7 @@ class StoreStockList(Resource):
         store = StoreModel.query.filter_by(id=store_id).first()
         if not store or not store:
             store_api.abort(404, "Store {} doesn't exist".format(store_id))
-        print([{stck.sku: stck.product} for stck in store.products], store.products[0])  # DEBUG
-        return store.products
+        return store.products  # returns stock models
 
     @store_api.doc('add product to store')
     @store_api.expect(_stock)
@@ -80,10 +89,13 @@ class StoreStockList(Resource):
         intermediate table 'stocks'
         """
         store = StoreModel.query.filter_by(id=store_id).first()
-        product = ProductModel.query.filter_by(id=store_id).first()
-        if not store or not product:
-            store_api.abort(404, "Params doesn't match any record")
+        if not store:
+            store_api.abort(404, "Store {} not found".format(store_id))
         data = request.json
+        product = ProductModel.query.filter_by(id=data['product_id']).first()
+        if not product:
+            store_api.abort(404,
+                            "Product {} not found".format(data['product_id']))
         stock = StockModel.query.filter_by(sku=data['sku']).first()
         if stock:
             response_object = {

@@ -12,7 +12,8 @@ class Product(db.Model):
     image_url = Column(String())
     stores = relationship(
         'Stock',
-        back_populates='product'
+        back_populates='product',
+        cascade='all, delete'
     )
 
     def __init__(self, name, image_url):
@@ -24,5 +25,10 @@ class Product(db.Model):
 
     def save(self):
         db.session.add(self)
+        db.session.commit()
+        return True
+
+    def delete(self):
+        db.session.delete(self)
         db.session.commit()
         return True

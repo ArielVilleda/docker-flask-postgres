@@ -31,9 +31,9 @@ class Stock:
             }
         )),
         'product': fields.Nested(api.model('stock_product', {
-                'id': fields.String(attribute='product_id'),
-                'name': fields.String(attribute='product_name'),
-                'image_url': fields.String(attribute='product_image_url')
+                'id': fields.String(attribute='id'),
+                'name': fields.String(attribute='name'),
+                'image_url': fields.String(attribute='image_url')
             }
         ))
     })

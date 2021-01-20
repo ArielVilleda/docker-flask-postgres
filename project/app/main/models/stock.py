@@ -29,10 +29,12 @@ class Stock(db.Model):
             self.sku
         )
 
-    @staticmethod
-    def with_relations(stock_id: int):
-        query = Stock.query.options(
-            db.joinedload('store'),
-            db.joinedload('product')
-        ).filter_by(id=stock_id)
-        return query
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        return True
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return True
