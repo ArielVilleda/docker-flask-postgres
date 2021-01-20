@@ -16,12 +16,14 @@ services:
         networks:
             - project_network
 
-    # WEB APP (PYTHON FRAMEWORK INSTALLED WITH requirements.txt)
+    # Project container (PYTHON FRAMEWORK INSTALLED WITH requirements.txt)
     project:
         build:
             context: ../
             dockerfile: ./docker/Dockerfile
         container_name: project
+        depends_on: 
+            - project_postgres
         env_file: ../project/.env  # added env variables to the container wnen executed
         stdin_open: true  # to enable terminal docker-compose exec <container_name> bash
         volumes:

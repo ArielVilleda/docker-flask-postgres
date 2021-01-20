@@ -3,26 +3,32 @@ from sqlalchemy import (Column, ForeignKey,
                         BigInteger, String)
 
 from app.main import db
-from .stock import stock_table
 
 
 class Product(db.Model):
     __tablename__ = 'products'
     id = Column(BigInteger, primary_key=True)
-    sku = Column(String(16), index=True)
     name = Column(String())
-    image = Column(String())
+    image_url = Column(String())
     stores = relationship(
-        'Store',
-        secondary=stock_table,
-        back_populates='products'
+        'Stock',
+        back_populates='product',
+        cascade='all, delete'
     )
 
-    def __init__(self, id, sku, name, image):
-        self.id = id
-        self.sku = sku
+    def __init__(self, name, image_url):
         self.name = name
-        self.image = image
+        self.image_url = image_url
 
     def __repr__(self):
         return '<id {}> {}'.format(self.id, self.name)
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        return True
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return True

@@ -4,33 +4,37 @@ from flask_restplus import Resource
 from app.main.models import PostalCode as PostalCodeModel
 from app.main.dto import PostalCode as PostalCodeDto
 
-api = PostalCodeDto.api
-_postal_code = PostalCodeDto.postal_code
+pcode_api = PostalCodeDto.api
+_pcode = PostalCodeDto.postal_code
 
 
-@api.route('/')
+@pcode_api.route('/limit/<int:limit>/offset/<int:offset>')
+@pcode_api.param('limit', 'The limit value for pagination')
+@pcode_api.param('offset', 'The offset value for pagination')
 class PostalCodeList(Resource):
-    @api.doc('list_of_registered_postal_codes')
-    @api.marshal_list_with(_postal_code, envelope='data')
-    def get(self):
+    @pcode_api.doc('list_of_registered_postal_codes')
+    @pcode_api.marshal_list_with(_pcode, envelope='data')
+    def get(self, limit, offset):
         """List all PostalCodes"""
-        return PostalCodeModel.query.all()
+        return PostalCodeModel.get_pagination(
+            limit=limit,
+            offset=offset
+        ).all()
 
 
-@api.route('/<postal_code>')
-@api.param('postal_code', 'The PostalCode identifier (5 digits)')
-@api.response(404, 'PostalCode not found.')
+@pcode_api.route('/<string:postal_code>')
+@pcode_api.param('postal_code', 'The PostalCode identifier (5 digits)')
+@pcode_api.response(404, 'PostalCode not found.')
 class PostalCode(Resource):
-    @api.doc('get PostalCode given 5 digit code')
-    @api.marshal_with(_postal_code)
+    @pcode_api.doc('get PostalCode given 5 digit code')
+    @pcode_api.marshal_with(_pcode)  # match with this model for response
     def get(self, postal_code):
-        """get PostalCode(s) given its identifier"""
+        """Get PostalCode(s) given its identifier"""
         pcodes = PostalCodeModel.query.filter_by(
             postal_code=postal_code
         )
-        print(postal_code)  # DEBUG
         result = pcodes.all()
-        if not postal_code:
-            api.abort(404)
+        if not result:
+            pcode_api.abort(404, "PostalCode {} not found".format(postal_code))
         else:
             return result

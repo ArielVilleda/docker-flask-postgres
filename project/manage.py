@@ -5,7 +5,7 @@ from flask_script import Manager
 
 from app.main import (create_app, db)  # importing our app
 from app import blueprint  # importing services
-# from app.main.models import *  # importing all our db models for migrations
+from app.main.models import *  # importing all our db models for migrations
 
 
 app = create_app(os.getenv('FLASK_ENV') or 'dev')  # dev, prod or test
@@ -41,15 +41,42 @@ def postal_codes():
     """Run PostalCodes sql file to migrate data un postal_codes table
     THIS WORKS ONLY ON A POSTGRES DB
     """
-    print('Deleting previous postal_codes')
-    db.engine.execute('DELETE FROM postal_codes;')
-    db.engine.execute('ALTER SEQUENCE postal_codes_id_seq RESTART WITH 1;')
-    with open('postal_codes_mex_2018-10-06.sql', 'r') as sql_file:
-        print('Migrating from file...')
-        result = db.engine.execute(sql_file.read())
-        print('Postal Code migrated ({} rows)'.format(result.rowcount))
+    print('Checking previous postal_codes in table...')
+    row_proxy = db.engine.execute(
+        'SELECT COUNT(*) as count FROM postal_codes;'
+    ).fetchone()
+    if row_proxy['count']:
+        print('There is data in postal_codes table. No migrations were made')
         return 0
+    else:
+        with open('postal_codes_mex_2018-10-06.sql', 'r') as sql_file:
+            print('Migrating from file...')
+            result = db.engine.execute(sql_file.read())
+            print('Postal Code migrated ({} rows)'.format(result.rowcount))
+            return 0
+
+
+@manager.command
+def postman_export():
+    """Run PostalCodes sql file to migrate data un postal_codes table
+    THIS WORKS ONLY ON A POSTGRES DB
+    """
+    from flask import json
+    from app import api
+
+    urlvars = False  # Build query strings in URLs
+    swagger = True  # Export Swagger specifications
+    data = api.as_postman(urlvars=urlvars, swagger=swagger)
+    with open('postman_colection.json', 'w') as f:
+        print(json.dumps(data), file=f)
+    return 0
 
 
 if __name__ == '__main__':
+    """NOTE: database commands examples exposed by manage.py:
+    python manage.py db init
+    python manage.py db migrate --message 'Initial database migration'
+    python manage.py db upgrade
+    python manage.py postal_codes
+    """
     manager.run()
