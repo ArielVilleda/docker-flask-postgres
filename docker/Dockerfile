@@ -12,3 +12,8 @@ RUN pip3 install -r requirements.txt
 # In the last steps of Dockerfile, coopying the others files 
 # to avoid reinstallation of dependecies if files changes
 COPY /project /data/web/
+
+
+# Default command to init app when
+RUN chmod +x init_app.sh
+CMD ./init_app.sh

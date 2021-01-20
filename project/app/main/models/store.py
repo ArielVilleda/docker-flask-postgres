@@ -3,7 +3,6 @@ from sqlalchemy import (Column, ForeignKey,
                         BigInteger, String)
 
 from app.main import db
-from .stock import stock_table
 
 
 class Store(db.Model):
@@ -22,12 +21,12 @@ class Store(db.Model):
     )
     store_pcode = relationship(
         'PostalCode',
-        backref='pcode_stores'
+        backref='pcode_store',
+        lazy='joined'
     )
     products = relationship(
-        'Product',
-        secondary=stock_table,
-        back_populates='stores',
+        'Stock',
+        back_populates='store',
     )
 
     def __init__(self, name, phone, email,
@@ -48,3 +47,10 @@ class Store(db.Model):
         db.session.add(self)
         db.session.commit()
         return True
+
+    @staticmethod
+    def with_postal_code(**kwargs):
+        query = Store.query.options(
+            db.joinedload('store_pcode')
+        )
+        return query

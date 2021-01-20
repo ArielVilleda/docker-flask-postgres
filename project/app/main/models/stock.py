@@ -1,34 +1,38 @@
-from sqlalchemy import (Table, Column, ForeignKey,
-                        BigInteger, Integer)
+from sqlalchemy.orm import relationship
+from sqlalchemy import (Column, ForeignKey,
+                        BigInteger, Integer, String)
 
 from app.main import db
 
 
-stock_table = Table(
-    'stocks',
-    db.metadata,
-    Column('store_id', BigInteger, ForeignKey('stores.id'),
-           nullable=False, index=True),
-    Column('product_id', BigInteger, ForeignKey('products.id'),
-           nullable=False, index=True),
-    Column('quantity', Integer, nullable=False, default=0)
-)
+class Stock(db.Model):
+    __tablename__ = 'stocks'
+    id = Column(BigInteger, primary_key=True)
+    store_id = Column(BigInteger, ForeignKey('stores.id'), index=True)
+    product_id = Column(BigInteger, ForeignKey('products.id'), index=True)
+    sku = Column(String(), nullable=False, unique=True, index=True)
+    store = relationship(
+        'Store',
+        back_populates='products',
+        lazy='joined'
+    )
+    product = relationship(
+        'Product',
+        back_populates='stores',
+        lazy='joined'
+    )
 
-# class Stock(db.Model):
-#     __tablename__ = 'stocks'
-#     store_id = db.Column(db.BigInteger)
-#     product_id = db.Column(db.BigInteger)
-#     quantity = db.Column(db.Integer)
+    def __repr__(self):
+        return '<store: {}, product: {}> {}'.format(
+            self.store_id,
+            self.product_id,
+            self.sku
+        )
 
-#     def __init__(self, store_id, product_id,
-#                  quantity):
-#         self.store_id = store_id
-#         self.product_id = product_id
-#         self.quantity = quantity
-
-#     def __repr__(self):
-#         return '<store: {}, product: {}> {}'.format(
-#             self.store_id,
-#             self.product_id,
-#             self.quantity
-#         )
+    @staticmethod
+    def with_relations(stock_id: int):
+        query = Stock.query.options(
+            db.joinedload('store'),
+            db.joinedload('product')
+        ).filter_by(id=stock_id)
+        return query
