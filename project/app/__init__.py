@@ -12,7 +12,7 @@ blueprint = Blueprint('api', __name__)
 api = Api(
     blueprint,
     title='Cargamos\'s Technical Test',
-    version='1.0',
+    version='1.0.0',
     description='Store inventory services'
 )
 

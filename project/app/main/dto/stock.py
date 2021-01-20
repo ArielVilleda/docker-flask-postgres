@@ -6,7 +6,7 @@ class Stock:
     stock = api.model('stock', {
         'store_id': fields.Integer(
             required=True,
-            description='product id'
+            description='store id'
         ),
         'product_id': fields.Integer(
             required=True,
@@ -36,4 +36,14 @@ class Stock:
                 'image_url': fields.String(attribute='image_url')
             }
         ))
+    })
+    stock_stats = api.model('stock_stats', {
+        'store_id': fields.Integer(
+            required=True,
+            description='store id'
+        ),
+        'product_id': fields.Integer(
+            required=False,
+            description='product id (optional)'
+        )
     })

@@ -9,6 +9,7 @@ from app.main.dto import Stock as StockDto
 stock_api = StockDto.api
 _stock = StockDto.stock
 _stock_response = StockDto.stock_response
+_stock_stats = StockDto.stock_stats
 
 
 @stock_api.route('/<int:stock_id>')
@@ -61,3 +62,28 @@ class Stock(Resource):
         store.products.append(stock)
         store.save()
         return stock
+
+
+@stock_api.route('/stats')
+@stock_api.response(422, 'Incorrect params.')
+@stock_api.response(200, 'Stats')
+class StockStats(Resource):
+    @stock_api.expect(_stock_stats)
+    @stock_api.doc("querys for stocks' stats")
+    def post(self):
+        """Querys for stock table"""
+        data = request.json
+        if 'store_id' not in data:
+            response_object = {
+                'status': 'fail',
+                'message': 'The store_id is required',
+            }
+            return response_object, 422
+        parsed_data = {'store_id': data['store_id']}
+        if 'product_id' in data:
+            parsed_data['product_id'] = data['product_id']
+        stock = StockModel.query.filter_by(**parsed_data).count()
+        response_object = {
+            'availability': stock,
+        }
+        return response_object, 200
