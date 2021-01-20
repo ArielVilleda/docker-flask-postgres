@@ -49,8 +49,8 @@ class Store(db.Model):
         return True
 
     @staticmethod
-    def all(**kwargs):
+    def with_postal_code(**kwargs):
         query = Store.query.options(
             db.joinedload('store_pcode')
         )
-        return query.all()
+        return query

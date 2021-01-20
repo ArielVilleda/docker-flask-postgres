@@ -1,30 +1,16 @@
 from flask_restplus import Namespace, fields
 
+from .store import Store as StoreCodeDto
+
 
 class Product:
     api = Namespace('product', description='product related operations')
     product = api.model('product', {
-        'name': fields.String(required=True, description='product namep'),
-        'image': fields.String(required=True,
-                               description='product thumbnail  path')
+        'name': fields.String(required=True, description='product name'),
+        'image_url': fields.String(required=True,
+                                   description='product thumbnail url')
     })
-    product_response = api.model('product_response', {
-        'id': fields.String(required=True, description='product identifier'),
-        'name': fields.String(required=True, description='product namep'),
-        'image': fields.String(required=True,
-                               description='product thumbnail  path')
-    })
-    stock = api.model('stock', {
-        'store_id': fields.Integer(
-            required=True,
-            description='store id'
-        ),
-        'product_id': fields.Integer(
-            required=True,
-            description='product id'
-        ),
-        'sku': fields.String(
-            required=True,
-            description='stored product sku',
-        )
+    # Inherit fields from product
+    product_response = api.inherit('product_response', product, {
+        'id': fields.String(required=True, description='product identifier')
     })

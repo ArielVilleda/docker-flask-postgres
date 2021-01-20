@@ -16,7 +16,7 @@ class ProductList(Resource):
     @product_api.marshal_list_with(_product_response, envelope='data')
     def get(self):
         """List all registered products with postal_code relation"""
-        return ProductModel.all()
+        return ProductModel.query.all()
 
     @product_api.response(201, 'Product successfully created.')
     @product_api.doc('create a new product')
@@ -41,9 +41,9 @@ class Product(Resource):
     @product_api.doc('get a product')
     @product_api.marshal_with(_product_response)
     def get(self, product_id):
-        """get a product given its identifier"""
+        """Get a product given its identifier"""
         product = ProductModel.query.filter_by(id=product_id).first()
         if not product:
-            product_api.abort(404)
+            product_api.abort(404, "Product {} doesn't exist".format(product_id))
         else:
             return product

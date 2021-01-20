@@ -19,21 +19,20 @@ class Store:
             required=True,
             description='zip code id (address)')
     })
-    store_response = api.model('store_response', {
+    # Inherit fields from store
+    store_response = api.inherit('store_response', store, {
         'id': fields.Integer(attribute='id'),
-        'name': fields.String(attribute='name'),
-        'phone': fields.String(attribute='phone'),
-        'email': fields.String(attribute='email'),
-        'street': fields.String(attribute='street'),
-        'external_number': fields.String(attribute='external_number'),
-        'internal_number': fields.String(attribute='internal_number'),
-        'postal_code': fields.Nested(PostalCodeDto.postal_code)
+        'postal_code': fields.Nested(api.model('postal_code', {
+                'id': fields.Integer(atribute='id'),
+                'neighborhood': fields.String(atribute='neighborhood'),
+                'district': fields.String(atribute='district'),
+                'state': fields.String(atribute='state'),
+                'city': fields.String(atribute='city'),
+                'postal_code': fields.String(atribute='postal_code')
+            }
+        ))
     })
-    stock = api.model('stock', {
-        'store_id': fields.Integer(
-            required=True,
-            description='store id'
-        ),
+    stock = api.model('store_stock', {
         'product_id': fields.Integer(
             required=True,
             description='product id'
@@ -42,4 +41,15 @@ class Store:
             required=True,
             description='stored product sku'
         )
+    })
+    # Inherit fields from stock
+    stock_response = api.inherit('store_stock_response', stock, {
+        'id': fields.Integer(attribute='id'),
+        'store_id': fields.Integer(attribute='store_id'),
+        'product': fields.Nested(api.model('store_stock_product', {
+                'id': fields.String(attribute='id'),
+                'name': fields.String(attribute='name'),
+                'image_url': fields.String(attribute='image_url')
+            }
+        ))
     })

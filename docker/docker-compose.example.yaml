@@ -3,7 +3,7 @@ version: '3'  # Docker version
 services:
     # DB (Postgres)
     project_postgres:
-        image: 'postgres:12.4'
+        image_url: 'postgres:12.4'
         container_name: project_postgres
         restart: always  # restart if crashed
         env_file: ../project/.env  # POSTGRES USER, PASSWORD AND DB IN THIS FILE
@@ -16,7 +16,7 @@ services:
         networks:
             - project_network
 
-    # WEB APP (PYTHON FRAMEWORK INSTALLED WITH requirements.txt)
+    # Project container (PYTHON FRAMEWORK INSTALLED WITH requirements.txt)
     project:
         build:
             context: ../

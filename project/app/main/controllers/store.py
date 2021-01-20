@@ -10,6 +10,7 @@ store_api = StoreDto.api
 _store = StoreDto.store
 _store_response = StoreDto.store_response
 _stock = StoreDto.stock
+_stock_response = StoreDto.stock_response
 
 
 @store_api.route('/')
@@ -18,13 +19,13 @@ class StoreList(Resource):
     @store_api.marshal_list_with(_store_response, envelope='data')
     def get(self):
         """List all registered stores with postal_code relation"""
-        return StoreModel.all()
+        return StoreModel.with_postal_code().all()
 
     @store_api.response(201, 'Store successfully created.')
     @store_api.doc('create a new store')
     @store_api.expect(_store, validate=True)
     def post(self):
-        """Creates a new Store """
+        """Creates a new Store"""
         data = request.json
         store = StoreModel.query.filter_by(email=data['email']).first()
         if store:
@@ -50,9 +51,53 @@ class Store(Resource):
     @store_api.doc('get a store')
     @store_api.marshal_with(_store_response)
     def get(self, store_id):
-        """get a store given its identifier"""
+        """Get a store given its identifier"""
         store = StoreModel.query.filter_by(id=store_id).first()
         if not store:
-            store_api.abort(404)
+            store_api.abort(404, "Store {} doesn't exist".format(store_id))
         else:
             return store
+
+
+@store_api.route('/<int:store_id>/stock')
+@store_api.param('store_id', 'The Store identifier')
+@store_api.response(404, 'Store or Product not found.')
+class StoreStockList(Resource):
+    @store_api.doc('list_of_registered_store_product')
+    @store_api.marshal_list_with(_stock_response, envelope='data')
+    def get(self, store_id):
+        """List all products given the store relation"""
+        store = StoreModel.query.filter_by(id=store_id).first()
+        if not store or not store:
+            store_api.abort(404, "Store {} doesn't exist".format(store_id))
+        print([{stck.sku: stck.product} for stck in store.products], store.products[0])  # DEBUG
+        return store.products
+
+    @store_api.doc('add product to store')
+    @store_api.expect(_stock)
+    def post(self, store_id):
+        """Associate product to the given store with the
+        intermediate table 'stocks'
+        """
+        store = StoreModel.query.filter_by(id=store_id).first()
+        product = ProductModel.query.filter_by(id=store_id).first()
+        if not store or not product:
+            store_api.abort(404, "Params doesn't match any record")
+        data = request.json
+        stock = StockModel.query.filter_by(sku=data['sku']).first()
+        if stock:
+            response_object = {
+                'status': 'fail',
+                'message': 'The sku was already assigned',
+            }
+            return response_object, 409
+        stock = StockModel(sku=data['sku'])
+        stock.product = product
+        store.products.append(stock)
+        store.save()
+        response_object = {
+            'status': 'success',
+            'message': 'Stock successfully created.',
+            'stock_id': stock.id,
+        }
+        return response_object, 201

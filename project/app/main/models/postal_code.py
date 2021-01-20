@@ -28,3 +28,10 @@ class PostalCode(db.Model):
 
     def __repr__(self):
         return '<id: {}> {}'.format(self.id, self.postal_code)
+
+    @staticmethod
+    def get_pagination(limit=100, offset=0):
+        query = PostalCode.query.order_by(
+            PostalCode.id.asc()
+        ).limit(limit).offset(offset)
+        return query

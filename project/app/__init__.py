@@ -16,5 +16,5 @@ api = Api(
 )
 
 api.add_namespace(pcode_ns, path='/postal_code')
-api.add_namespace(store_ns, path='/store')
 api.add_namespace(product_ns, path='/product')
+api.add_namespace(store_ns, path='/store')
