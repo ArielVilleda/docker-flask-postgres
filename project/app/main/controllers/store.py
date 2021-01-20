@@ -2,23 +2,27 @@ from flask import request
 from flask_restplus import Resource
 
 from app.main.models import Store as StoreModel
+from app.main.models import Product as ProductModel
+from app.main.models import Stock as StockModel
 from app.main.dto import Store as StoreDto
 
-api = StoreDto.api
+store_api = StoreDto.api
 _store = StoreDto.store
+_store_response = StoreDto.store_response
+_stock = StoreDto.stock
 
 
-@api.route('/')
+@store_api.route('/')
 class StoreList(Resource):
-    @api.doc('list_of_registered_stores')
-    @api.marshal_list_with(_store, envelope='data')
+    @store_api.doc('list_of_registered_stores')
+    @store_api.marshal_list_with(_store_response, envelope='data')
     def get(self):
-        """List all registered stores"""
-        return StoreModel.query.all()
+        """List all registered stores with postal_code relation"""
+        return StoreModel.all()
 
-    @api.response(201, 'Store successfully created.')
-    @api.doc('create a new store')
-    @api.expect(_store, validate=True)
+    @store_api.response(201, 'Store successfully created.')
+    @store_api.doc('create a new store')
+    @store_api.expect(_store, validate=True)
     def post(self):
         """Creates a new Store """
         data = request.json
@@ -34,21 +38,21 @@ class StoreList(Resource):
         response_object = {
             'status': 'success',
             'message': 'Store successfully created.',
-            'store': new_store
+            'store_id': new_store.id
         }
         return response_object, 201
 
 
-@api.route('/<id>')
-@api.param('id', 'The Store identifier')
-@api.response(404, 'Store not found.')
+@store_api.route('/<int:store_id>')
+@store_api.param('store_id', 'The Store identifier')
+@store_api.response(404, 'Store not found.')
 class Store(Resource):
-    @api.doc('get a store')
-    @api.marshal_with(_store)
-    def get(self, id):
+    @store_api.doc('get a store')
+    @store_api.marshal_with(_store_response)
+    def get(self, store_id):
         """get a store given its identifier"""
-        store = StoreModel.query.filter_by(id=id).first()
+        store = StoreModel.query.filter_by(id=store_id).first()
         if not store:
-            api.abort(404)
+            store_api.abort(404)
         else:
             return store

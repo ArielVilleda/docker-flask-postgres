@@ -5,7 +5,7 @@ from flask_script import Manager
 
 from app.main import (create_app, db)  # importing our app
 from app import blueprint  # importing services
-# from app.main.models import *  # importing all our db models for migrations
+from app.main.models import *  # importing all our db models for migrations
 
 
 app = create_app(os.getenv('FLASK_ENV') or 'dev')  # dev, prod or test

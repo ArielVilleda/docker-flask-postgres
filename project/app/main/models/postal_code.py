@@ -13,7 +13,7 @@ class PostalCode(db.Model):
     state = Column(String())
     city = Column(String())
     postal_code = Column(String(), index=True)
-    pcodes_stores = relationship(
+    pcodes_store = relationship(
         'Store',
         backref='postal_code'
     )
