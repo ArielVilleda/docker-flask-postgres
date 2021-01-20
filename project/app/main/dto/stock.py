@@ -6,7 +6,7 @@ class Stock:
     stock = api.model('stock', {
         'store_id': fields.Integer(
             required=True,
-            description='product id'
+            description='store id'
         ),
         'product_id': fields.Integer(
             required=True,
@@ -31,9 +31,19 @@ class Stock:
             }
         )),
         'product': fields.Nested(api.model('stock_product', {
-                'id': fields.String(attribute='product_id'),
-                'name': fields.String(attribute='product_name'),
-                'image_url': fields.String(attribute='product_image_url')
+                'id': fields.String(attribute='id'),
+                'name': fields.String(attribute='name'),
+                'image_url': fields.String(attribute='image_url')
             }
         ))
+    })
+    stock_stats = api.model('stock_stats', {
+        'store_id': fields.Integer(
+            required=True,
+            description='store id'
+        ),
+        'product_id': fields.Integer(
+            required=False,
+            description='product id (optional)'
+        )
     })

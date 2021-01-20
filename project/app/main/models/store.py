@@ -27,6 +27,7 @@ class Store(db.Model):
     products = relationship(
         'Stock',
         back_populates='store',
+        cascade='all, delete'
     )
 
     def __init__(self, name, phone, email,
@@ -45,6 +46,11 @@ class Store(db.Model):
 
     def save(self):
         db.session.add(self)
+        db.session.commit()
+        return True
+
+    def delete(self):
+        db.session.delete(self)
         db.session.commit()
         return True
 

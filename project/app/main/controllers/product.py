@@ -44,6 +44,16 @@ class Product(Resource):
         """Get a product given its identifier"""
         product = ProductModel.query.filter_by(id=product_id).first()
         if not product:
-            product_api.abort(404, "Product {} doesn't exist".format(product_id))
+            product_api.abort(404, "Product {} not found".format(product_id))
         else:
             return product
+
+    @product_api.doc('delete_product')
+    @product_api.response(204, 'product deleted')
+    def delete(self, product_id):
+        """Delete a product given its identifier"""
+        product = ProductModel.query.filter_by(id=product_id).first()
+        if not product:
+            product_api.abort(404, "Product {} not found".format(product_id))
+        product.delete()
+        return '', 204
